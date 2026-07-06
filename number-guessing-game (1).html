@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crack the Vault</title>
+<style>
+  @font-face {
+    font-family: 'Rockwell-fallback';
+    src: local('Rockwell');
+  }
+
+  :root {
+    --bg: #1b1e24;
+    --bg-panel: #23272f;
+    --brass: #c9a464;
+    --brass-dim: #8a744d;
+    --ember: #d1495b;
+    --steel: #4a7a96;
+    --parchment: #ece6d6;
+    --parchment-dim: #a9a495;
+    --shadow: rgba(0,0,0,0.5);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background:
+      radial-gradient(circle at 50% -10%, #2a2f38 0%, var(--bg) 55%),
+      repeating-linear-gradient(45deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 8px);
+    color: var(--parchment);
+    font-family: 'Courier New', ui-monospace, monospace;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .vault {
+    width: 100%;
+    max-width: 480px;
+    background: linear-gradient(180deg, var(--bg-panel), #1e2128);
+    border: 1px solid rgba(201,164,100,0.25);
+    border-radius: 18px;
+    box-shadow: 0 30px 60px var(--shadow), inset 0 1px 0 rgba(255,255,255,0.04);
+    padding: 36px 32px 30px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .vault::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, transparent, var(--brass), transparent);
+    opacity: 0.6;
+  }
+
+  .rivets {
+    position: absolute;
+    top: 14px; left: 14px; right: 14px; bottom: 14px;
+    border: 1px solid rgba(201,164,100,0.12);
+    border-radius: 10px;
+    pointer-events: none;
+  }
+
+  h1 {
+    font-family: 'Georgia', 'Rockwell-fallback', serif;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    font-size: 1.5rem;
+    color: var(--brass);
+    text-align: center;
+    margin: 0 0 4px;
+  }
+
+  .subtitle {
+    text-align: center;
+    color: var(--parchment-dim);
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    margin: 0 0 28px;
+  }
+
+  .subtitle span {
+    color: var(--brass-dim);
+  }
+
+  /* --- Dial gauge --- */
+  .gauge-wrap {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  svg#gauge {
+    width: 260px;
+    height: 160px;
+    overflow: visible;
+  }
+
+  .gauge-label {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    fill: var(--parchment-dim);
+    font-family: 'Courier New', monospace;
+  }
+
+  .needle {
+    transform-origin: 130px 130px;
+    transition: transform 0.6s cubic-bezier(.34,1.56,.64,1);
+    filter: drop-shadow(0 0 6px rgba(209,73,91,0.4));
+  }
+
+  .needle.cold { filter: drop-shadow(0 0 6px rgba(74,122,150,0.5)); }
+  .needle.hot { filter: drop-shadow(0 0 8px rgba(209,73,91,0.7)); }
+  .needle.win { filter: drop-shadow(0 0 12px rgba(201,164,100,0.9)); }
+
+  .gauge-status {
+    text-align: center;
+    font-size: 0.95rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    min-height: 1.4em;
+    margin-bottom: 22px;
+    transition: color 0.4s ease;
+  }
+
+  /* --- Input row --- */
+  .entry-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  input[type="number"] {
+    flex: 1;
+    background: #14161b;
+    border: 1px solid rgba(201,164,100,0.3);
+    border-radius: 8px;
+    color: var(--parchment);
+    font-family: 'Courier New', monospace;
+    font-size: 1.3rem;
+    text-align: center;
+    letter-spacing: 0.1em;
+    padding: 12px 10px;
+    -moz-appearance: textfield;
+  }
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type="number"]:focus {
+    outline: 2px solid var(--brass);
+    outline-offset: 1px;
+  }
+
+  button {
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    background: linear-gradient(180deg, var(--brass), var(--brass-dim));
+    color: #211a0f;
+    border: none;
+    border-radius: 8px;
+    padding: 0 20px;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  button:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(201,164,100,0.35); }
+  button:active { transform: translateY(0); }
+  button:focus-visible { outline: 2px solid var(--parchment); outline-offset: 2px; }
+
+  .hint {
+    text-align: center;
+    font-size: 0.72rem;
+    color: var(--parchment-dim);
+    margin: 6px 0 22px;
+    letter-spacing: 0.06em;
+  }
+
+  /* --- Ledger of attempts --- */
+  .ledger {
+    border-top: 1px dashed rgba(201,164,100,0.25);
+    padding-top: 14px;
+    max-height: 140px;
+    overflow-y: auto;
+  }
+
+  .ledger-title {
+    font-size: 0.68rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--brass-dim);
+    margin-bottom: 8px;
+  }
+
+  .ledger-entry {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    padding: 3px 0;
+    color: var(--parchment-dim);
+    animation: fadeIn 0.3s ease;
+  }
+
+  .ledger-entry .tag-hot { color: var(--ember); }
+  .ledger-entry .tag-cold { color: var(--steel); }
+  .ledger-entry .tag-win { color: var(--brass); font-weight: bold; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .ledger::-webkit-scrollbar { width: 6px; }
+  .ledger::-webkit-scrollbar-thumb { background: var(--brass-dim); border-radius: 3px; }
+
+  .win-banner {
+    display: none;
+    text-align: center;
+    margin-top: 18px;
+    padding: 14px;
+    border: 1px solid rgba(201,164,100,0.4);
+    border-radius: 10px;
+    background: rgba(201,164,100,0.08);
+  }
+  .win-banner.show { display: block; }
+  .win-banner .big {
+    font-family: 'Georgia', serif;
+    font-size: 1.3rem;
+    color: var(--brass);
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+  }
+  .win-banner .small {
+    font-size: 0.78rem;
+    color: var(--parchment-dim);
+    margin-bottom: 12px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .needle, button, .ledger-entry { transition: none; animation: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="vault">
+  <div class="rivets"></div>
+  <h1>Crack the Vault</h1>
+  <p class="subtitle">Combination lies between <span>1</span> and <span>20</span></p>
+
+  <div class="gauge-wrap">
+    <svg id="gauge" viewBox="0 0 260 160">
+      <!-- arc background -->
+      <path d="M 20 130 A 110 110 0 0 1 240 130" fill="none" stroke="#33383f" stroke-width="14" stroke-linecap="round"/>
+      <!-- zones -->
+      <path d="M 20 130 A 110 110 0 0 1 130 20" fill="none" stroke="var(--steel)" stroke-width="14" stroke-linecap="round" opacity="0.55"/>
+      <path d="M 130 20 A 110 110 0 0 1 240 130" fill="none" stroke="var(--ember)" stroke-width="14" stroke-linecap="round" opacity="0.55"/>
+
+      <text x="28" y="150" class="gauge-label">LOW</text>
+      <text x="208" y="150" class="gauge-label">HIGH</text>
+
+      <!-- needle -->
+      <g class="needle cold" id="needle">
+        <line x1="130" y1="130" x2="130" y2="34" stroke="var(--parchment)" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="130" cy="130" r="8" fill="var(--brass)"/>
+      </g>
+    </svg>
+  </div>
+
+  <p class="gauge-status" id="status" style="color: var(--parchment-dim);">Guess a number between 1 and 20.</p>
+
+  <form id="guessForm" autocomplete="off">
+    <div class="entry-row">
+      <input type="number" id="guessInput" min="1" max="20" placeholder="1–20" required>
+      <button type="submit">Try</button>
+    </div>
+  </form>
+  <p class="hint">Enter, then press <strong>Try</strong> — or hit Enter.</p>
+
+  <div class="win-banner" id="winBanner">
+    <div class="big">The tumblers click into place.</div>
+    <div class="small" id="winDetail"></div>
+    <button type="button" id="resetBtn">Reset the Vault</button>
+  </div>
+
+  <div class="ledger">
+    <div class="ledger-title">Attempt Log</div>
+    <div id="ledgerList"></div>
+  </div>
+</div>
+
+<script>
+  const MIN = 1, MAX = 20;
+  const SECRET = 16; // fixed combination
+  let attempts, solved;
+
+  const needle = document.getElementById('needle');
+  const status = document.getElementById('status');
+  const form = document.getElementById('guessForm');
+  const input = document.getElementById('guessInput');
+  const ledgerList = document.getElementById('ledgerList');
+  const winBanner = document.getElementById('winBanner');
+  const winDetail = document.getElementById('winDetail');
+  const resetBtn = document.getElementById('resetBtn');
+
+  function newGame() {
+    attempts = 0;
+    solved = false;
+    ledgerList.innerHTML = '';
+    winBanner.classList.remove('show');
+    status.textContent = 'Guess a number between 1 and 20.';
+    status.style.color = 'var(--parchment-dim)';
+    setNeedle(0, 'cold');
+    input.value = '';
+    input.disabled = false;
+    input.focus();
+  }
+
+  // angle: -70 (low, far left) to +70 (high, far right), 0 = center/win
+  function setNeedle(angle, zone) {
+    needle.style.transform = `rotate(${angle}deg)`;
+    needle.classList.remove('cold', 'hot', 'win');
+    needle.classList.add(zone);
+  }
+
+  function addLedgerEntry(guess, tagClass, tagText) {
+    const row = document.createElement('div');
+    row.className = 'ledger-entry';
+    row.innerHTML = `<span>#${attempts} → ${guess}</span><span class="${tagClass}">${tagText}</span>`;
+    ledgerList.prepend(row);
+  }
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (solved) return;
+    const val = parseInt(input.value, 10);
+    if (isNaN(val) || val < MIN || val > MAX) {
+      status.textContent = `Enter a number between ${MIN} and ${MAX}.`;
+      status.style.color = 'var(--ember)';
+      return;
+    }
+
+    attempts++;
+
+    if (val === SECRET) {
+      solved = true;
+      setNeedle(0, 'win');
+      status.textContent = 'Congratulations! You guessed the correct number 🎉🎉';
+      status.style.color = 'var(--brass)';
+      addLedgerEntry(val, 'tag-win', 'CORRECT');
+      winDetail.textContent = `You cracked it in ${attempts} ${attempts === 1 ? 'try' : 'tries'}.`;
+      winBanner.classList.add('show');
+      input.disabled = true;
+      return;
+    }
+
+    if (val < SECRET) {
+      setNeedle(-55, 'cold');
+      status.textContent = 'Too low! Try again 🙄';
+      status.style.color = 'var(--steel)';
+      addLedgerEntry(val, 'tag-cold', 'too low');
+    } else {
+      setNeedle(55, 'hot');
+      status.textContent = 'Too high! Try again 😏';
+      status.style.color = 'var(--ember)';
+      addLedgerEntry(val, 'tag-hot', 'too high');
+    }
+
+    input.value = '';
+    input.focus();
+  });
+
+  resetBtn.addEventListener('click', newGame);
+
+  newGame();
+</script>
+
+</body>
+</html>
