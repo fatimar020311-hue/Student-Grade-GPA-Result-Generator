@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Grade & Result System</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f5f4f0;
+      --surface: #ffffff;
+      --surface2: #f1efe9;
+      --border: rgba(0,0,0,0.12);
+      --border2: rgba(0,0,0,0.22);
+      --text: #1a1a18;
+      --text2: #5f5e5a;
+      --text3: #888780;
+      --blue: #185FA5;
+      --blue-bg: #E6F1FB;
+      --blue-text: #0C447C;
+      --green: #3B6D11;
+      --green-bg: #EAF3DE;
+      --red: #A32D2D;
+      --red-bg: #FCEBEB;
+      --amber-bg: #FAEEDA;
+      --amber-text: #633806;
+      --teal-bg: #E1F5EE;
+      --teal-text: #085041;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --radius-xl: 16px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+
+    .app {
+      max-width: 560px;
+      margin: 0 auto;
+    }
+
+    .header {
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .logo {
+      width: 44px;
+      height: 44px;
+      background: var(--blue);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+
+    .header-text h1 {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .header-text p {
+      font-size: 13px;
+      color: var(--text2);
+      margin-top: 2px;
+    }
+
+    .step-bar {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 1.75rem;
+      align-items: center;
+    }
+
+    .step-seg {
+      height: 4px;
+      flex: 1;
+      border-radius: 100px;
+      background: var(--border);
+      transition: background 0.35s;
+    }
+
+    .step-seg.active { background: var(--blue); }
+    .step-seg.done { background: #639922; }
+
+    .card {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      margin-bottom: 1rem;
+    }
+
+    .field { margin-bottom: 1rem; }
+    .field:last-child { margin-bottom: 0; }
+
+    .field label {
+      display: block;
+      font-size: 13px;
+      color: var(--text2);
+      margin-bottom: 5px;
+    }
+
+    .field input[type="text"],
+    .field input[type="number"] {
+      width: 100%;
+      padding: 9px 12px;
+      border: 0.5px solid var(--border2);
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      color: var(--text);
+      background: var(--surface);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .field input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(24,95,165,0.12);
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .error {
+      font-size: 12px;
+      color: var(--red);
+      margin-top: 4px;
+      display: none;
+    }
+
+    .subject-card {
+      background: var(--surface2);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .subject-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 0.85rem;
+    }
+
+    .subject-num {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--blue-bg);
+      color: var(--blue-text);
+      font-size: 11px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .subject-name-input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      outline: none;
+    }
+
+    .subject-name-input::placeholder { color: var(--text3); font-weight: 400; }
+
+    .remove-btn {
+      background: none;
+      border: none;
+      color: var(--text3);
+      cursor: pointer;
+      font-size: 16px;
+      padding: 2px;
+      line-height: 1;
+      border-radius: 4px;
+      transition: color 0.2s, background 0.2s;
+    }
+
+    .remove-btn:hover { color: var(--red); background: var(--red-bg); }
+
+    .slider-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .slider-field label {
+      font-size: 12px;
+      color: var(--text2);
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .slider-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    input[type="range"] {
+      flex: 1;
+      height: 4px;
+      border-radius: 100px;
+      accent-color: var(--blue);
+      cursor: pointer;
+    }
+
+    .slider-val {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      min-width: 34px;
+      text-align: right;
+    }
+
+    .btn-add {
+      width: 100%;
+      background: transparent;
+      border: 0.5px dashed var(--border2);
+      border-radius: var(--radius-md);
+      padding: 10px;
+      font-size: 13px;
+      color: var(--text2);
+      cursor: pointer;
+      text-align: center;
+      transition: background 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-add:hover { background: var(--surface2); }
+
+    .btn-primary {
+      width: 100%;
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-md);
+      padding: 11px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .btn-primary:hover { background: var(--blue-text); }
+    .btn-primary:active { transform: scale(0.98); }
+
+    .btn-secondary {
+      background: var(--surface);
+      color: var(--text2);
+      border: 0.5px solid var(--border2);
+      border-radius: var(--radius-md);
+      padding: 10px 18px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.2s;
+    }
+
+    .btn-secondary:hover { background: var(--surface2); }
+
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-top: 0.75rem;
+    }
+
+    .nav .btn-primary { flex: 1; width: auto; }
+
+    /* ── Result card ── */
+    .result-hero {
+      text-align: center;
+      padding: 1.5rem 1rem 1.25rem;
+      border-bottom: 0.5px solid var(--border);
+      margin-bottom: 1.25rem;
+    }
+
+    .avatar {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--blue-bg);
+      color: var(--blue-text);
+      font-size: 20px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 0.85rem;
+    }
+
+    .res-name { font-size: 20px; font-weight: 600; }
+    .res-roll { font-size: 13px; color: var(--text2); margin-top: 3px; }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 14px;
+      border-radius: 100px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-top: 0.75rem;
+    }
+
+    .pass { background: var(--green-bg); color: var(--green); }
+    .fail { background: var(--red-bg); color: var(--red); }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 1.25rem;
+    }
+
+    .stat {
+      background: var(--surface2);
+      border-radius: var(--radius-md);
+      padding: 0.75rem 0.5rem;
+      text-align: center;
+    }
+
+    .stat-val { font-size: 20px; font-weight: 600; color: var(--text); }
+    .stat-lbl { font-size: 11px; color: var(--text2); margin-top: 3px; }
+
+    .grade-chip {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .g-aplus { background: var(--teal-bg); color: var(--teal-text); }
+    .g-a     { background: var(--blue-bg); color: var(--blue-text); }
+    .g-b     { background: var(--green-bg); color: var(--green); }
+    .g-c     { background: var(--amber-bg); color: var(--amber-text); }
+    .g-d     { background: #FAECE7; color: #4A1B0C; }
+    .g-f     { background: var(--red-bg); color: var(--red); }
+
+    .progress-wrap {
+      margin-bottom: 1.25rem;
+    }
+
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text2);
+      margin-bottom: 6px;
+    }
+
+    .progress-track {
+      background: var(--surface2);
+      border-radius: 100px;
+      height: 8px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 100px;
+      width: 0%;
+      transition: width 0.7s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    .sub-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 0.5px solid var(--border);
+      font-size: 13px;
+    }
+
+    .sub-row:last-child { border-bottom: none; }
+    .sub-pct { font-weight: 600; color: var(--text); }
+    .sub-marks { color: var(--text2); font-size: 12px; }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 1rem;
+    }
+
+    .btn-row .btn-secondary { flex: 0 0 auto; }
+    .btn-row .btn-primary { flex: 1; }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 480px) {
+      .stat-grid { grid-template-columns: repeat(2, 1fr); }
+      .field-row, .slider-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo"><i class="ti ti-school" aria-hidden="true"></i></div>
+    <div class="header-text">
+      <h1>Student Result System</h1>
+      <p>Enter marks and generate a result card instantly</p>
+    </div>
+  </div>
+
+  <!-- Step bar -->
+  <div class="step-bar">
+    <div class="step-seg active" id="seg0"></div>
+    <div class="step-seg" id="seg1"></div>
+    <div class="step-seg" id="seg2"></div>
+  </div>
+
+  <!-- Page 0: Student info -->
+  <div id="page0">
+    <div class="card">
+      <div class="section-label">Student information</div>
+      <div class="field">
+        <label>Full name</label>
+        <input type="text" id="sname" placeholder="e.g. Ali Hassan" />
+        <div class="error" id="err-name">Please enter the student's name</div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Roll number</label>
+          <input type="number" id="sroll" placeholder="e.g. 101" min="1" />
+          <div class="error" id="err-roll">Please enter a roll number</div>
+        </div>
+        <div class="field">
+          <label>Number of subjects</label>
+          <input type="number" id="scount" placeholder="1–12" min="1" max="12" value="5" />
+          <div class="error" id="err-count">Enter between 1 and 12</div>
+        </div>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="goStep1()">
+      <i class="ti ti-arrow-right" aria-hidden="true"></i> Continue to marks
+    </button>
+  </div>
+
+  <!-- Page 1: Subject marks -->
+  <div id="page1" class="hidden">
+    <div class="card">
+      <div class="section-label">Subject marks</div>
+      <div id="subjects-container"></div>
+      <button class="btn-add" onclick="addSubject()" id="add-btn">
+        <i class="ti ti-plus" aria-hidden="true"></i> Add subject
+      </button>
+    </div>
+    <div class="nav">
+      <button class="btn-secondary" onclick="goStep0()">
+        <i class="ti ti-arrow-left" aria-hidden="true"></i> Back
+      </button>
+      <button class="btn-primary" onclick="generateResult()">
+        <i class="ti ti-chart-bar" aria-hidden="true"></i> Generate result card
+      </button>
+    </div>
+  </div>
+
+  <!-- Page 2: Result -->
+  <div id="page2" class="hidden">
+    <div class="card">
+      <div class="result-hero">
+        <div class="avatar" id="res-avatar"></div>
+        <div class="res-name" id="res-name"></div>
+        <div class="res-roll" id="res-roll"></div>
+        <div id="res-status"></div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat">
+          <div class="stat-val" id="res-total"></div>
+          <div class="stat-lbl">Total marks</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val" id="res-pct"></div>
+          <div class="stat-lbl">Percentage</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val" id="res-grade"></div>
+          <div class="stat-lbl">Grade</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val" id="res-gpa"></div>
+          <div class="stat-lbl">GPA</div>
+        </div>
+      </div>
+
+      <div class="progress-wrap">
+        <div class="progress-label">
+          <span>Overall performance</span>
+          <span id="res-pct-label"></span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="res-bar"></div>
+        </div>
+      </div>
+
+      <div class="section-label">Subject breakdown</div>
+      <div id="res-subjects"></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-secondary" onclick="goStep1()">
+        <i class="ti ti-edit" aria-hidden="true"></i> Edit
+      </button>
+      <button class="btn-primary" onclick="resetAll()">
+        <i class="ti ti-plus" aria-hidden="true"></i> New student
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let subjectCount = 0;
+
+  function goStep0() {
+    show('page0'); hide('page1'); hide('page2');
+    updateSegs(0);
+  }
+
+  function goStep1() {
+    const name  = document.getElementById('sname').value.trim();
+    const roll  = document.getElementById('sroll').value.trim();
+    const count = parseInt(document.getElementById('scount').value);
+    let ok = true;
+    toggle('err-name',  !name,                   ok = ok && !!name);
+    toggle('err-roll',  !roll,                   ok = ok && !!roll);
+    toggle('err-count', !count||count<1||count>12, ok = ok && (!!count&&count>=1&&count<=12));
+    if (!ok) return;
+    buildSubjects(count);
+    hide('page0'); show('page1'); hide('page2');
+    updateSegs(1);
+  }
+
+  function buildSubjects(n) {
+    const c = document.getElementById('subjects-container');
+    c.innerHTML = '';
+    subjectCount = n;
+    for (let i = 1; i <= n; i++) appendSubjectCard(i);
+    refreshAddBtn();
+  }
+
+  function addSubject() {
+    if (subjectCount >= 12) return;
+    subjectCount++;
+    appendSubjectCard(subjectCount);
+    refreshAddBtn();
+  }
+
+  function appendSubjectCard(i) {
+    const c = document.getElementById('subjects-container');
+    const d = document.createElement('div');
+    d.className = 'subject-card';
+    d.id = 'sub-' + i;
+    d.innerHTML = `
+      <div class="subject-title">
+        <span class="subject-num">${i}</span>
+        <input class="subject-name-input" type="text" id="sname${i}" placeholder="Subject name (e.g. Mathematics)" />
+        ${i > 1 ? `<button class="remove-btn" onclick="removeSubject(${i})" title="Remove subject"><i class="ti ti-x"></i></button>` : ''}
+      </div>
+      <div class="slider-row">
+        <div class="slider-field">
+          <label>Marks obtained</label>
+          <div class="slider-wrap">
+            <input type="range" min="0" max="100" value="75" id="obt${i}" oninput="syncSlider(${i})" />
+            <span class="slider-val" id="oval${i}">75</span>
+          </div>
+        </div>
+        <div class="slider-field">
+          <label>Total marks</label>
+          <div class="slider-wrap">
+            <input type="range" min="10" max="200" value="100" step="10" id="max${i}" oninput="syncSlider(${i})" />
+            <span class="slider-val" id="mval${i}">100</span>
+          </div>
+        </div>
+      </div>`;
+    c.appendChild(d);
+    syncSlider(i);
+  }
+
+  function syncSlider(i) {
+    const o = parseInt(document.getElementById('obt'+i).value);
+    const m = parseInt(document.getElementById('max'+i).value);
+    document.getElementById('mval'+i).textContent = m;
+    const oSlider = document.getElementById('obt'+i);
+    oSlider.max = m;
+    if (o > m) oSlider.value = m;
+    document.getElementById('oval'+i).textContent = parseInt(oSlider.value);
+  }
+
+  function removeSubject(i) {
+    const el = document.getElementById('sub-' + i);
+    if (el) { el.remove(); subjectCount = Math.max(subjectCount - 1, getSubjectCards().length); }
+    refreshAddBtn();
+  }
+
+  function refreshAddBtn() {
+    const n = getSubjectCards().length;
+    document.getElementById('add-btn').style.display = n >= 12 ? 'none' : '';
+  }
+
+  function getSubjectCards() {
+    return Array.from(document.querySelectorAll('#subjects-container .subject-card'));
+  }
+
+  function generateResult() {
+    const name = document.getElementById('sname').value.trim();
+    const roll = document.getElementById('sroll').value.trim();
+    const cards = getSubjectCards();
+    if (!cards.length) return;
+
+    let totalObt = 0, totalMax = 0;
+    const subjects = [];
+
+    cards.forEach((card, idx) => {
+      const id = card.id.replace('sub-', '');
+      const sn = (document.getElementById('sname'+id)?.value.trim()) || ('Subject ' + (idx+1));
+      const o  = parseInt(document.getElementById('obt'+id)?.value || 0);
+      const m  = parseInt(document.getElementById('max'+id)?.value || 100);
+      totalObt += o;
+      totalMax += m;
+      subjects.push({ name: sn, obtained: o, max: m });
+    });
+
+    const pct   = totalMax === 0 ? 0 : (totalObt / totalMax * 100);
+    const grade = calcGrade(pct);
+    const gpa   = calcGPA(pct);
+    const status = pct >= 40 ? 'PASS' : 'FAIL';
+
+    const initials = name.split(' ').filter(Boolean).map(w => w[0]).join('').toUpperCase().slice(0, 2);
+    document.getElementById('res-avatar').textContent = initials;
+    document.getElementById('res-name').textContent   = name;
+    document.getElementById('res-roll').textContent   = 'Roll No. ' + roll;
+
+    document.getElementById('res-status').innerHTML =
+      `<span class="status-badge ${status === 'PASS' ? 'pass' : 'fail'}">
+        <i class="ti ${status === 'PASS' ? 'ti-circle-check' : 'ti-circle-x'}" aria-hidden="true"></i>
+        ${status}
+      </span>`;
+
+    document.getElementById('res-total').textContent = totalObt + '/' + totalMax;
+    document.getElementById('res-pct').textContent   = pct.toFixed(1) + '%';
+    document.getElementById('res-grade').innerHTML   =
+      `<span class="grade-chip g-${grade.toLowerCase().replace('+','plus')}">${grade}</span>`;
+    document.getElementById('res-gpa').textContent   = gpa.toFixed(1);
+    document.getElementById('res-pct-label').textContent = pct.toFixed(1) + '%';
+
+    const barColor =
+      pct >= 80 ? '#1D9E75' :
+      pct >= 60 ? '#185FA5' :
+      pct >= 40 ? '#EF9F27' : '#E24B4A';
+    const bar = document.getElementById('res-bar');
+    bar.style.background = barColor;
+    bar.style.width = '0%';
+    setTimeout(() => { bar.style.width = Math.min(pct, 100).toFixed(1) + '%'; }, 80);
+
+    document.getElementById('res-subjects').innerHTML = subjects.map(s => {
+      const sp = s.max === 0 ? 0 : (s.obtained / s.max * 100);
+      return `<div class="sub-row">
+        <span>${s.name}</span>
+        <span class="sub-marks">${s.obtained}/${s.max}</span>
+        <span class="sub-pct">${sp.toFixed(0)}%</span>
+      </div>`;
+    }).join('');
+
+    hide('page0'); hide('page1'); show('page2');
+    updateSegs(2);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function calcGrade(p) {
+    if (p >= 90) return 'A+';
+    if (p >= 80) return 'A';
+    if (p >= 70) return 'B';
+    if (p >= 60) return 'C';
+    if (p >= 40) return 'D';
+    return 'F';
+  }
+
+  function calcGPA(p) {
+    if (p >= 90) return 4.0;
+    if (p >= 80) return 3.7;
+    if (p >= 70) return 3.0;
+    if (p >= 60) return 2.0;
+    if (p >= 40) return 1.0;
+    return 0.0;
+  }
+
+  function resetAll() {
+    document.getElementById('sname').value  = '';
+    document.getElementById('sroll').value  = '';
+    document.getElementById('scount').value = '5';
+    goStep0();
+  }
+
+  function updateSegs(active) {
+    for (let i = 0; i < 3; i++) {
+      const s = document.getElementById('seg'+i);
+      s.className = 'step-seg' + (i === active ? ' active' : i < active ? ' done' : '');
+    }
+  }
+
+  function show(id) { document.getElementById(id).classList.remove('hidden'); }
+  function hide(id) { document.getElementById(id).classList.add('hidden'); }
+
+  function toggle(errId, condition) {
+    document.getElementById(errId).style.display = condition ? 'block' : 'none';
+  }
+</script>
+
+</body>
+</html>
